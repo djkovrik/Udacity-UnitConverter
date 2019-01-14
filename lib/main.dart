@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:udacity_unit_converter/category.dart';
-
-// DONE: Pass this information into your custom [Category] widget
-const _categoryName = 'Cake';
-const _categoryIcon = Icons.cake;
-const _categoryColor = Colors.green;
+import 'package:udacity_unit_converter/category_route.dart';
 
 void main() {
   runApp(UnitConverterApp());
@@ -19,11 +14,7 @@ class UnitConverterApp extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Colors.green[100],
         body: Center(
-          child: Category(
-            name: _categoryName,
-            color: _categoryColor,
-            iconLocation: _categoryIcon,
-          ),
+          child: CategoryRoute(),
         ),
       ),
     );
