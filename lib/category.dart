@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:udacity_unit_converter/converter_route.dart';
 import 'package:udacity_unit_converter/unit.dart';
 
 final _rowHeight = 100.0;
@@ -17,15 +18,29 @@ class Category extends StatelessWidget {
     @required this.color,
     @required this.iconLocation,
     @required this.units,
-  })
-      : assert(name != null),
-        assert(color != null),
-        assert(iconLocation != null),
-        assert(units != null),
-        super(key: key);
+  }) : super(key: key);
 
   void _navigateToConverter(BuildContext context) {
-    // TODO: Using the Navigator, navigate to the [ConverterRoute]
+    Navigator.of(context).push(MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            elevation: 0.0,
+            title: Text(
+              name,
+              style: Theme.of(context).textTheme.display1,
+            ),
+            centerTitle: true,
+            backgroundColor: color,
+          ),
+          body: ConverterRoute(
+            color: color,
+            name: name,
+            units: units,
+          ),
+        );
+      },
+    ));
   }
 
   @override
@@ -57,10 +72,7 @@ class Category extends StatelessWidget {
                   child: Text(
                     name,
                     textAlign: TextAlign.center,
-                    style: Theme
-                        .of(context)
-                        .textTheme
-                        .headline,
+                    style: Theme.of(context).textTheme.headline,
                   ),
                 ),
               ],
