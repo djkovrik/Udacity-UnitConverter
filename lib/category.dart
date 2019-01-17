@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-import 'package:udacity_unit_converter/converter_route.dart';
-import 'package:udacity_unit_converter/unit.dart';
+import 'converter_route.dart';
+import 'unit.dart';
 
 final _rowHeight = 100.0;
 final _borderRadius = BorderRadius.circular(_rowHeight / 2);
@@ -25,7 +25,7 @@ class Category extends StatelessWidget {
       builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
-            elevation: 0.0,
+            elevation: 1.0,
             title: Text(
               name,
               style: Theme.of(context).textTheme.display1,
@@ -38,6 +38,7 @@ class Category extends StatelessWidget {
             name: name,
             units: units,
           ),
+          resizeToAvoidBottomPadding: false,
         );
       },
     ));
@@ -51,11 +52,10 @@ class Category extends StatelessWidget {
         height: _rowHeight,
         child: InkWell(
           borderRadius: _borderRadius,
+          // TODO: Use the highlight and splash colors from the ColorSwatch
           highlightColor: color,
           splashColor: color,
-          onTap: () {
-            _navigateToConverter(context);
-          },
+          onTap: () => _navigateToConverter(context),
           child: Padding(
             padding: EdgeInsets.all(8.0),
             child: Row(
