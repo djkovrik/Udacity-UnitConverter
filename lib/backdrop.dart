@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 
 import 'category.dart';
 
-const double _kFlingVelocity = 2.0;
+const double _flingVelocity = 2.0;
 
 class _BackdropPanel extends StatelessWidget {
   const _BackdropPanel({
@@ -114,7 +114,11 @@ class Backdrop extends StatefulWidget {
     @required this.backPanel,
     @required this.frontTitle,
     @required this.backTitle,
-  });
+  })  : assert(currentCategory != null),
+        assert(frontPanel != null),
+        assert(backPanel != null),
+        assert(frontTitle != null),
+        assert(backTitle != null);
 
   @override
   _BackdropState createState() => _BackdropState();
@@ -141,12 +145,11 @@ class _BackdropState extends State<Backdrop>
     if (widget.currentCategory != old.currentCategory) {
       setState(() {
         _controller.fling(
-            velocity:
-                _backdropPanelVisible ? -_kFlingVelocity : _kFlingVelocity);
+            velocity: _backdropPanelVisible ? -_flingVelocity : _flingVelocity);
       });
     } else if (!_backdropPanelVisible) {
       setState(() {
-        _controller.fling(velocity: _kFlingVelocity);
+        _controller.fling(velocity: _flingVelocity);
       });
     }
   }
@@ -166,7 +169,7 @@ class _BackdropState extends State<Backdrop>
   void _toggleBackdropPanelVisibility() {
     FocusScope.of(context).requestFocus(FocusNode());
     _controller.fling(
-        velocity: _backdropPanelVisible ? -_kFlingVelocity : _kFlingVelocity);
+        velocity: _backdropPanelVisible ? -_flingVelocity : _flingVelocity);
   }
 
   double get _backdropHeight {
@@ -188,13 +191,12 @@ class _BackdropState extends State<Backdrop>
     final double flingVelocity =
         details.velocity.pixelsPerSecond.dy / _backdropHeight;
     if (flingVelocity < 0.0)
-      _controller.fling(velocity: math.max(_kFlingVelocity, -flingVelocity));
+      _controller.fling(velocity: math.max(_flingVelocity, -flingVelocity));
     else if (flingVelocity > 0.0)
-      _controller.fling(velocity: math.min(-_kFlingVelocity, -flingVelocity));
+      _controller.fling(velocity: math.min(-_flingVelocity, -flingVelocity));
     else
       _controller.fling(
-          velocity:
-              _controller.value < 0.5 ? -_kFlingVelocity : _kFlingVelocity);
+          velocity: _controller.value < 0.5 ? -_flingVelocity : _flingVelocity);
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
@@ -251,7 +253,6 @@ class _BackdropState extends State<Backdrop>
       body: LayoutBuilder(
         builder: _buildStack,
       ),
-      resizeToAvoidBottomPadding: false,
     );
   }
 }

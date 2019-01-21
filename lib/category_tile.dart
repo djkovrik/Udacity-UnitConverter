@@ -1,9 +1,3 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// To keep your imports tidy, follow the ordering guidelines at
-// https://www.dartlang.org/guides/language/effective-dart/style#ordering
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -19,21 +13,22 @@ class CategoryTile extends StatelessWidget {
   const CategoryTile({
     Key key,
     @required this.category,
-    @required this.onTap,
+    this.onTap,
   })  : assert(category != null),
-        assert(onTap != null),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color:
+          onTap == null ? Color.fromRGBO(50, 50, 50, 0.2) : Colors.transparent,
       child: Container(
         height: _rowHeight,
         child: InkWell(
           borderRadius: _borderRadius,
           highlightColor: category.color['highlight'],
-          onTap: () => onTap(category),
+          splashColor: category.color['splash'],
+          onTap: onTap == null ? null : () => onTap(category),
           child: Padding(
             padding: EdgeInsets.all(8.0),
             child: Row(
@@ -41,10 +36,7 @@ class CategoryTile extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Icon(
-                    category.iconLocation,
-                    size: 60.0,
-                  ),
+                  child: Image.asset(category.iconLocation),
                 ),
                 Center(
                   child: Text(

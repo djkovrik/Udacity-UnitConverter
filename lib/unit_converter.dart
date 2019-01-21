@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+import 'api.dart';
 import 'category.dart';
 import 'unit.dart';
 
@@ -11,26 +14,27 @@ class UnitConverter extends StatefulWidget {
 
   const UnitConverter({
     @required this.category,
-  });
+  }) : assert(category != null);
 
   @override
   _UnitConverterState createState() => _UnitConverterState();
 }
 
 class _UnitConverterState extends State<UnitConverter> {
-  Unit _from;
-  Unit _into;
+  Unit _fromValue;
+  Unit _toValue;
   double _inputValue;
   String _convertedValue = '';
   List<DropdownMenuItem> _unitMenuItems;
   bool _showValidationError = false;
   final _inputKey = GlobalKey(debugLabel: 'inputText');
+  bool _showErrorUI = false;
 
   @override
   void initState() {
     super.initState();
     _createDropdownMenuItems();
-    _initializeDefaults();
+    _setDefaults();
   }
 
   @override
@@ -38,14 +42,14 @@ class _UnitConverterState extends State<UnitConverter> {
     super.didUpdateWidget(old);
     if (old.category != widget.category) {
       _createDropdownMenuItems();
-      _initializeDefaults();
+      _setDefaults();
     }
   }
 
   void _createDropdownMenuItems() {
-    var items = <DropdownMenuItem>[];
+    var newItems = <DropdownMenuItem>[];
     for (var unit in widget.category.units) {
-      items.add(DropdownMenuItem(
+      newItems.add(DropdownMenuItem(
         value: unit.name,
         child: Container(
           child: Text(
@@ -56,14 +60,14 @@ class _UnitConverterState extends State<UnitConverter> {
       ));
     }
     setState(() {
-      _unitMenuItems = items;
+      _unitMenuItems = newItems;
     });
   }
 
-  void _initializeDefaults() {
+  void _setDefaults() {
     setState(() {
-      _from = widget.category.units[0];
-      _into = widget.category.units[1];
+      _fromValue = widget.category.units[0];
+      _toValue = widget.category.units[1];
     });
     if (_inputValue != null) {
       _updateConversion();
@@ -85,11 +89,26 @@ class _UnitConverterState extends State<UnitConverter> {
     return outputNum;
   }
 
-  void _updateConversion() {
-    setState(() {
-      _convertedValue =
-          _format(_inputValue * (_into.conversion / _from.conversion));
-    });
+  Future<void> _updateConversion() async {
+    if (widget.category.name == apiCategory['name']) {
+      final api = Api();
+      final conversion = await api.convert(apiCategory['route'],
+          _inputValue.toString(), _fromValue.name, _toValue.name);
+      if (conversion == null) {
+        setState(() {
+          _showErrorUI = true;
+        });
+      } else {
+        setState(() {
+          _convertedValue = _format(conversion);
+        });
+      }
+    } else {
+      setState(() {
+        _convertedValue = _format(
+            _inputValue * (_toValue.conversion / _fromValue.conversion));
+      });
+    }
   }
 
   void _updateInputValue(String input) {
@@ -121,7 +140,7 @@ class _UnitConverterState extends State<UnitConverter> {
 
   void _updateFromConversion(dynamic unitName) {
     setState(() {
-      _from = _getUnit(unitName);
+      _fromValue = _getUnit(unitName);
     });
     if (_inputValue != null) {
       _updateConversion();
@@ -130,7 +149,7 @@ class _UnitConverterState extends State<UnitConverter> {
 
   void _updateToConversion(dynamic unitName) {
     setState(() {
-      _into = _getUnit(unitName);
+      _toValue = _getUnit(unitName);
     });
     if (_inputValue != null) {
       _updateConversion();
@@ -169,6 +188,38 @@ class _UnitConverterState extends State<UnitConverter> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.category.units == null ||
+        (widget.category.name == apiCategory['name'] && _showErrorUI)) {
+      return SingleChildScrollView(
+        child: Container(
+          margin: _padding,
+          padding: _padding,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0),
+            color: widget.category.color['error'],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 180.0,
+                color: Colors.white,
+              ),
+              Text(
+                "Oh no! We can't connect right now!",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headline.copyWith(
+                      color: Colors.white,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final input = Padding(
       padding: _padding,
       child: Column(
@@ -188,7 +239,7 @@ class _UnitConverterState extends State<UnitConverter> {
             keyboardType: TextInputType.number,
             onChanged: _updateInputValue,
           ),
-          _createDropdown(_from.name, _updateFromConversion),
+          _createDropdown(_fromValue.name, _updateFromConversion),
         ],
       ),
     );
@@ -219,7 +270,7 @@ class _UnitConverterState extends State<UnitConverter> {
               ),
             ),
           ),
-          _createDropdown(_into.name, _updateToConversion),
+          _createDropdown(_toValue.name, _updateToConversion),
         ],
       ),
     );
